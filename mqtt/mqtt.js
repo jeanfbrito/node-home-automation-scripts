@@ -1,7 +1,7 @@
 var mqtt = require('mqtt'); //includes mqtt server
 var mongodb = require('mongodb'); // includes mongoDB
 var mongodbClient = mongodb.MongoClient; //initialises the mongoDB client
-var mongodbURI = 'mongodb://localhost:27017/home'; //activating the MongoDB port 27017, here TempMontor is the name of the database
+var mongodbURI = 'mongodb://192.168.13.91:27017/home'; //activating the MongoDB port 27017, here TempMontor is the name of the database
 var measurements, devices, client; //initialise collection and client
 
 mongodbClient.connect(mongodbURI, setupCollection); //connect the database with collecion
