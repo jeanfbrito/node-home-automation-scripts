@@ -8,13 +8,46 @@ var token = '142952712:AAELSde5_kmxUjPhx1KTvbK-d2IUtADPN6U';
 // Setup polling way
 var bot = new TelegramBot(token, {polling: true});
 
+var mongo = require('mongodb');
+
+var Server = mongo.Server,
+    Db = mongo.Db,
+    BSON = mongo.BSONPure;
+
+var server = new Server('192.168.13.91', 27017, {auto_reconnect: true});
+db = new Db('home', server);
+
+
 client = mqtt.connect({
     host: '192.168.13.91',
     port: 1883
 }); //connecting the mqtt server with the MongoDB database
-client.on('message', handleMessages); //inserting the event
 client.subscribe("sensors/#"); //subscribing to the topic name
 client.subscribe("devices/#"); //subscribing to the topic name
+client.on('message', handleMessages); //inserting the event
+
+db.open(function(err, db) {
+    if(!err) {
+        console.log("Connected to 'home' database");
+        db.collection('measurements', {strict:true}, function(err, collection) {
+            if (err) {
+                console.log("The 'home' collection doesn't exist. Creating it with sample data...");
+                //populateDB();
+            }
+        });
+    }
+});
+
+bot.onText(/\/water/, function (msg) {
+  var chatId = msg.chat.id;
+  console.log(msg);
+  db.collection('measurements', function(err, collection) {
+      collection.find( { "device": "18fe34f3632f" } ).sort({$natural:-1}).limit(1).toArray(function(err, items) {
+          //console.log(items[0].device);
+          bot.sendMessage(chatId, "Nivel da água: " + items[0].level);
+      });
+  });
+});
 
 bot.onText(/\/gate/, function (msg) {
   var chatId = msg.chat.id;
